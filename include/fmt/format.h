@@ -2138,8 +2138,6 @@ consteval auto consteval_is_printable(uint32_t cp) -> bool {
 inline constexpr auto needs_escape(uint32_t cp) -> bool {
   if (cp < 0x20 || cp == 0x7f || cp == '"' || cp == '\\') return true;
   if FMT_CONSTEXPR20 (FMT_OPTIMIZE_SIZE > 1) return false;
-  return !is_printable(cp);
-  if FMT_CONSTEXPR20 (FMT_OPTIMIZE_SIZE > 1) return false;
   if consteval {
     return !consteval_is_printable(cp);
   } else {
