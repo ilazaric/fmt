@@ -453,7 +453,7 @@ FMT_CONSTEXPR20 inline auto countl_zero(uint64_t n) -> int {
   return countl_zero_fallback(n);
 }
 
-FMT_INLINE constexpr void assume(bool condition) {
+FMT_INLINE FMT_CONSTEXPR void assume(bool condition) {
   (void)condition;
 #if FMT_HAS_BUILTIN(__builtin_assume) && !FMT_ICC_VERSION
   __builtin_assume(condition);
@@ -1059,7 +1059,7 @@ class basic_memory_buffer : public detail::buffer<T> {
 using memory_buffer = basic_memory_buffer<char>;
 
 template <size_t SIZE>
-FMT_NODISCARD constexpr auto to_string(const basic_memory_buffer<char, SIZE>& buf)
+FMT_NODISCARD FMT_CONSTEXPR auto to_string(const basic_memory_buffer<char, SIZE>& buf)
     -> std::string {
   auto size = buf.size();
   detail::assume(size < std::string().max_size());
@@ -1360,10 +1360,10 @@ FMT_END_EXPORT
 #endif  // FMT_HEADER_ONLY
 
 // Compares two characters for equality.
-template <typename Char> constexpr auto equal2(const Char* lhs, const char* rhs) -> bool {
+template <typename Char> FMT_CONSTEXPR auto equal2(const Char* lhs, const char* rhs) -> bool {
   return lhs[0] == Char(rhs[0]) && lhs[1] == Char(rhs[1]);
 }
-inline constexpr auto equal2(const char* lhs, const char* rhs) -> bool {
+inline FMT_CONSTEXPR auto equal2(const char* lhs, const char* rhs) -> bool {
   return memcmp(lhs, rhs, 2) == 0;
 }
 
