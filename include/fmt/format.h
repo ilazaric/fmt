@@ -4778,19 +4778,24 @@ FMT_NODISCARD FMT_INLINE auto formatted_size(locale_ref loc,
 FMT_API auto vformat(string_view fmt, format_args args) -> std::string;
 
 namespace detail {
-consteval void consteval_vformat_to(buffer<char>& buf, string_view fmt, format_args args) {
+  template<typename A = buffer<char>, typename B = string_view, typename C = format_args,
+           typename D = default_arg_formatter<char>,
+           typename E = format_handler<>,
+           typename F = parse_context<>>
+consteval void consteval_vformat_to(std::type_identity_t<A>& buf, std::type_identity_t<B> fmt, std::type_identity_t<C> args) {
   auto out = appender(buf);
   if (fmt.size() == 2 && equal2(fmt.data(), "{}"))
-    return args.get(0).visit(default_arg_formatter<char>{out});
+    return args.get(0).visit(D{out});
   parse_format_string(fmt,
-                      format_handler<>{parse_context<>(fmt), {out, args}});
+                      E{F(fmt), {out, args}});
 }
 }
 
-consteval auto consteval_vformat(string_view fmt, format_args args) -> std::string {
+template<typename A = string_view, typename B = format_args, typename C = memory_buffer>
+consteval auto consteval_vformat(std::type_identity_t<A> fmt, std::type_identity_t<B> args) -> std::string {
   // Don't optimize the "{}" case to keep the binary size small and because it
   // can be better optimized in fmt::format anyway.
-  auto buffer = memory_buffer();
+  auto buffer = C();
   detail::consteval_vformat_to(buffer, fmt, args);
   return to_string(buffer);
 }
