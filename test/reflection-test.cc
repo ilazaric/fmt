@@ -10,6 +10,9 @@
 #include "fmt/compile.h"
 #include "fmt/std.h"
 
+static_assert(sizeof(fmt::parse_context<char>) == 24);
+static_assert(sizeof(fmt::detail::compile_parse_context<char>) == 40);
+
 template <> struct fmt::formatter<std::meta::info> {
   consteval auto parse(auto& ctx) { return ctx.begin(); }
   consteval auto format(std::meta::info r, auto& ctx) const {
@@ -22,3 +25,6 @@ struct magic_type {};
 
 static_assert("[magic_type]" == fmt::format(FMT_COMPILE("[{}]"), ^^magic_type));
 static_assert("magic_type" == fmt::format(FMT_COMPILE("{}"), ^^magic_type));
+
+static_assert("[magic_type]" == fmt::format("[{}]", ^^magic_type));
+static_assert("magic_type" == fmt::format("{}", ^^magic_type));

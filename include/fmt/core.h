@@ -846,6 +846,7 @@ template <typename Char = char> class parse_context {
  private:
   basic_string_view<Char> fmt_;
   int next_arg_id_;
+  bool is_compile_parse_context_;
 
   enum { use_constexpr_cast = !FMT_GCC_VERSION || FMT_GCC_VERSION >= 1200 };
 
@@ -856,8 +857,11 @@ template <typename Char = char> class parse_context {
   using iterator = const Char*;
 
   constexpr explicit parse_context(basic_string_view<Char> fmt,
-                                   int next_arg_id = 0)
-      : fmt_(fmt), next_arg_id_(next_arg_id) {}
+                                   int next_arg_id = 0,
+                                   bool is_compile_parse_context = false)
+      : fmt_(fmt),
+        next_arg_id_(next_arg_id),
+        is_compile_parse_context_(is_compile_parse_context) {}
 
   /// Returns an iterator to the beginning of the format string range being
   /// parsed.
@@ -1255,7 +1259,7 @@ class compile_parse_context : public parse_context<Char> {
   constexpr explicit compile_parse_context(basic_string_view<Char> fmt,
                                            int num_args, const type* types,
                                            int next_arg_id = 0)
-      : base(fmt, next_arg_id), num_args_(num_args), types_(types) {}
+      : base(fmt, next_arg_id, true), num_args_(num_args), types_(types) {}
 
   constexpr auto num_args() const -> int { return num_args_; }
   constexpr auto arg_type(int id) const -> type { return types_[id]; }
@@ -2129,7 +2133,9 @@ template <typename T, typename Char> struct type_is_unformattable_for;
 template <typename Char> struct string_value {
   const Char* data;
   size_t size;
-  auto str() const -> basic_string_view<Char> { return {data, size}; }
+  FMT_CONSTEXPR auto str() const -> basic_string_view<Char> {
+    return {data, size};
+  }
 };
 
 template <typename Context> struct custom_value {
@@ -2287,8 +2293,9 @@ template <typename Context> class value {
 
   // Formats an argument of a custom type, such as a user-defined class.
   template <typename T>
-  static void format_custom(void* arg, parse_context<char_type>& parse_ctx,
-                            Context& ctx) {
+  static FMT_CONSTEXPR void format_custom(void* arg,
+                                          parse_context<char_type>& parse_ctx,
+                                          Context& ctx) {
     auto f = formatter<T, char_type>();
     parse_ctx.advance_to(f.parse(parse_ctx));
     using qualified_type =
@@ -2436,7 +2443,8 @@ template <typename Char>
 FMT_CONSTEXPR void parse_context<Char>::do_check_arg_id(int arg_id) {
   // Argument id is only checked at compile time during parsing because
   // formatting has its own validation.
-  if (detail::is_constant_evaluated() && use_constexpr_cast) {
+  if (detail::is_constant_evaluated() && use_constexpr_cast &&
+      is_compile_parse_context_) {
     auto ctx = static_cast<detail::compile_parse_context<Char>*>(this);
     if (arg_id >= ctx->num_args()) report_error("argument not found");
   }
@@ -2445,7 +2453,8 @@ FMT_CONSTEXPR void parse_context<Char>::do_check_arg_id(int arg_id) {
 template <typename Char>
 FMT_CONSTEXPR void parse_context<Char>::check_dynamic_spec(int arg_id) {
   using detail::compile_parse_context;
-  if (detail::is_constant_evaluated() && use_constexpr_cast)
+  if (detail::is_constant_evaluated() && use_constexpr_cast &&
+      is_compile_parse_context_)
     static_cast<compile_parse_context<Char>*>(this)->check_dynamic_spec(arg_id);
 }
 
@@ -2488,9 +2497,11 @@ template <typename Context> class basic_format_arg {
     detail::custom_value<Context> custom_;
 
    public:
-    explicit handle(detail::custom_value<Context> custom) : custom_(custom) {}
+    FMT_CONSTEXPR explicit handle(detail::custom_value<Context> custom)
+        : custom_(custom) {}
 
-    void format(parse_context<char_type>& parse_ctx, Context& ctx) const {
+    FMT_CONSTEXPR void format(parse_context<char_type>& parse_ctx,
+                              Context& ctx) const {
       custom_.format(custom_.value, parse_ctx, ctx);
     }
   };
@@ -2536,9 +2547,9 @@ template <typename Context> class basic_format_arg {
     return vis(monostate());
   }
 
-  auto format_custom(const char_type* parse_begin,
-                     parse_context<char_type>& parse_ctx, Context& ctx)
-      -> bool {
+  FMT_CONSTEXPR auto format_custom(const char_type* parse_begin,
+                                   parse_context<char_type>& parse_ctx,
+                                   Context& ctx) -> bool {
     if (type_ != detail::type::custom_type) return false;
     parse_ctx.advance_to(parse_begin);
     value_.custom.format(value_.custom.value, parse_ctx, ctx);
