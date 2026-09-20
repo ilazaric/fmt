@@ -494,3 +494,6 @@ TEST(compile_test, format_as) {
   // compiled field path rather than the to_string fast path.
   EXPECT_EQ("[42]", fmt::format(FMT_COMPILE("[{}]"), type_with_format_as{42}));
 }
+
+static_assert(fmt::format(FMT_COMPILE("[{}]"), "a b c") == "[a b c]");
+static_assert(fmt::format(FMT_COMPILE("[{:?}]"), "a b c") == "[\"a b c\"]");

@@ -1787,10 +1787,13 @@ FMT_FUNC void vprint(string_view fmt, format_args args) {
 
 namespace detail {
 
+#ifndef FMT_PRINTABLE_SINGLETON_
+#define FMT_PRINTABLE_SINGLETON_
 struct singleton {
   unsigned char upper;
   unsigned char lower_count;
 };
+#endif // FMT_PRINTABLE_SINGLETON_
 
 inline auto is_printable(uint16_t x, const singleton* singletons,
                          size_t singletons_size,
