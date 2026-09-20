@@ -497,7 +497,12 @@ TEST(compile_test, format_as) {
 
 #if FMT_USE_CONSTEXPR_STRING && FMT_CPLUSPLUS >= 201700L
 static_assert(fmt::format(FMT_COMPILE("[{}]"), "a b c") == "[a b c]");
+static_assert(fmt::format(FMT_COMPILE("[{}]"), std::vector{1, 2, 3}) ==
+              "[[1, 2, 3]]");
+
 #  if FMT_USE_CONSTEVAL_IS_PRINTABLE
 static_assert(fmt::format(FMT_COMPILE("[{:?}]"), "a b c") == "[\"a b c\"]");
+static_assert(fmt::format(FMT_COMPILE("{::?}"), std::vector{"foo", "bar"}) ==
+              "[\"foo\", \"bar\"]");
 #  endif
 #endif
