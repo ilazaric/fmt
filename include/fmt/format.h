@@ -1953,6 +1953,16 @@ FMT_API auto is_printable(uint32_t cp) -> bool;
 #define FMT_PRINTABLE_IDENTIFIER consteval_is_printable
 #include "is_printable.inc"
 
+inline FMT_CONSTEXPR auto needs_escape(uint32_t cp) -> bool {
+  if (cp < 0x20 || cp == 0x7f || cp == '"' || cp == '\\') return true;
+  if FMT_CONSTEXPR20 (FMT_OPTIMIZE_SIZE > 1) return false;
+  if consteval {
+    return !consteval_is_printable(cp);
+  } else {
+    return !is_printable(cp);
+  }
+}
+
 template <typename Char> struct find_escape_result {
   const Char* begin;
   const Char* end;

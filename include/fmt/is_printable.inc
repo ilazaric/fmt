@@ -14,12 +14,12 @@
 #endif
 
 #ifndef FMT_PRINTABLE_SINGLETON_
-#define FMT_PRINTABLE_SINGLETON_
+#  define FMT_PRINTABLE_SINGLETON_
 struct singleton {
   unsigned char upper;
   unsigned char lower_count;
 };
-#endif // FMT_PRINTABLE_SINGLETON_
+#endif  // FMT_PRINTABLE_SINGLETON_
 
 FMT_PRINTABLE_SPECIFIER_1 auto FMT_PRINTABLE_IDENTIFIER(
     uint16_t x, const singleton* singletons, size_t singletons_size,
@@ -182,14 +182,14 @@ FMT_PRINTABLE_SPECIFIER_2 auto FMT_PRINTABLE_IDENTIFIER(uint32_t cp) -> bool {
   };
   auto lower = static_cast<uint16_t>(cp);
   if (cp < 0x10000) {
-    return is_printable(lower, singletons0,
-                        sizeof(singletons0) / sizeof(*singletons0),
-                        singletons0_lower, normal0, sizeof(normal0));
+    return FMT_PRINTABLE_IDENTIFIER(
+        lower, singletons0, sizeof(singletons0) / sizeof(*singletons0),
+        singletons0_lower, normal0, sizeof(normal0));
   }
   if (cp < 0x20000) {
-    return is_printable(lower, singletons1,
-                        sizeof(singletons1) / sizeof(*singletons1),
-                        singletons1_lower, normal1, sizeof(normal1));
+    return FMT_PRINTABLE_IDENTIFIER(
+        lower, singletons1, sizeof(singletons1) / sizeof(*singletons1),
+        singletons1_lower, normal1, sizeof(normal1));
   }
   if (0x2a6de <= cp && cp < 0x2a700) return false;
   if (0x2b735 <= cp && cp < 0x2b740) return false;

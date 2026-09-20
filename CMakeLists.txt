@@ -289,7 +289,8 @@ foreach (
   printf.h
   ranges.h
   std.h
-  xchar.h)
+  xchar.h
+  is_printable.inc)
   set(FMT_HEADERS ${FMT_HEADERS} include/fmt/${header})
 endforeach ()
 
