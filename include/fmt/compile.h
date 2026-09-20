@@ -518,33 +518,6 @@ FMT_INLINE FMT_CONSTEXPR_STRING auto format(const S&, T&&... args)
   }
 }
 
-template <typename S, typename... T,
-          FMT_ENABLE_IF(is_compiled_string<S>::value)>
-FMT_INLINE FMT_CONSTEXPR_STRING auto format2(const S&, T&&... args)
-    -> std::basic_string<typename S::char_type> {
-  if constexpr (std::is_same<typename S::char_type, char>::value) {
-    constexpr auto str = basic_string_view<typename S::char_type>(S());
-    if constexpr (str.size() == 2 && str[0] == '{' && str[1] == '}') {
-      const auto& first = detail::first(args...);
-      if constexpr (detail::is_named_arg<
-                        remove_cvref_t<decltype(first)>>::value) {
-        return fmt::to_string(first.value);
-      } else {
-        return fmt::to_string(first);
-      }
-    }
-  }
-  constexpr auto compiled = detail::compile<T...>(S());
-  if constexpr (std::is_same<remove_cvref_t<decltype(compiled)>,
-                             detail::unknown_format>()) {
-    return fmt::format(
-        static_cast<basic_string_view<typename S::char_type>>(S()),
-        std::forward<T>(args)...);
-  } else {
-    return fmt::format(compiled, std::forward<T>(args)...);
-  }
-}
-
 template <typename OutputIt, typename S, typename... T,
           FMT_ENABLE_IF(is_compiled_string<S>::value)>
 FMT_CONSTEXPR auto format_to(OutputIt out, const S&, T&&... args) -> OutputIt {
