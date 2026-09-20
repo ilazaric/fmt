@@ -1953,9 +1953,12 @@ FMT_API auto is_printable(uint32_t cp) -> bool;
 #  define FMT_PRINTABLE_SPECIFIER_2 consteval
 #  define FMT_PRINTABLE_IDENTIFIER consteval_is_printable
 #  include "is_printable.inc"
+#define FMT_CONSTEXPR_FOR_IS_PRINTABLE constexpr
+#else
+#define FMT_CONSTEXPR_FOR_IS_PRINTABLE
 #endif
 
-inline FMT_CONSTEXPR auto needs_escape(uint32_t cp) -> bool {
+inline FMT_CONSTEXPR_FOR_IS_PRINTABLE auto needs_escape(uint32_t cp) -> bool {
   if (cp < 0x20 || cp == 0x7f || cp == '"' || cp == '\\') return true;
   if FMT_CONSTEXPR20 (FMT_OPTIMIZE_SIZE > 1) return false;
 #if FMT_USE_CONSTEVAL_IS_PRINTABLE
@@ -1975,7 +1978,7 @@ template <typename Char> struct find_escape_result {
 };
 
 template <typename Char>
-FMT_CONSTEXPR auto find_escape(const Char* begin, const Char* end)
+ FMT_CONSTEXPR_FOR_IS_PRINTABLE auto find_escape(const Char* begin, const Char* end)
     -> find_escape_result<Char> {
   for (; begin != end; ++begin) {
     uint32_t cp = static_cast<unsigned_char<Char>>(*begin);
@@ -1985,7 +1988,7 @@ FMT_CONSTEXPR auto find_escape(const Char* begin, const Char* end)
   return {begin, nullptr, 0};
 }
 
-inline FMT_CONSTEXPR auto find_escape(const char* begin, const char* end)
+inline FMT_CONSTEXPR_FOR_IS_PRINTABLE auto find_escape(const char* begin, const char* end)
     -> find_escape_result<char> {
   if FMT_CONSTEXPR20 (!use_utf8) return find_escape<char>(begin, end);
   auto result = find_escape_result<char>{end, nullptr, 0};
