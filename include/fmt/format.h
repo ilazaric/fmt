@@ -1947,7 +1947,7 @@ auto write_ptr(OutputIt out, UIntPtr value, const format_specs* specs)
 
 // Returns true iff the code point cp is printable.
 FMT_API auto is_printable(uint32_t cp) -> bool;
-  
+
 #define FMT_PRINTABLE_SPECIFIER_1 consteval
 #define FMT_PRINTABLE_SPECIFIER_2 consteval
 #define FMT_PRINTABLE_IDENTIFIER consteval_is_printable
@@ -2043,7 +2043,8 @@ auto write_escaped_cp(OutputIt out, const find_escape_result<Char>& escape)
 }
 
 template <typename Char, typename OutputIt>
-FMT_CONSTEXPR auto write_escaped_string(OutputIt out, basic_string_view<Char> str)
+FMT_CONSTEXPR auto write_escaped_string(OutputIt out,
+                                        basic_string_view<Char> str)
     -> OutputIt {
   *out++ = static_cast<Char>('"');
   auto begin = str.begin(), end = str.end();

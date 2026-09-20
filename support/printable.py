@@ -171,7 +171,7 @@ def main():
     normal1 = compress_normal(normal1)
 
     print("""\
-FMT_FUNC auto is_printable(uint32_t cp) -> bool {\
+FMT_PRINTABLE_SPECIFIER_2 auto FMT_PRINTABLE_IDENTIFIER(uint32_t cp) -> bool {\
 """)
     print_singletons(singletons0u, singletons0l, 'singletons0', 'singletons0_lower')
     print_singletons(singletons1u, singletons1l, 'singletons1', 'singletons1_lower')
@@ -180,12 +180,12 @@ FMT_FUNC auto is_printable(uint32_t cp) -> bool {\
     print("""\
   auto lower = static_cast<uint16_t>(cp);
   if (cp < 0x10000) {
-    return is_printable(lower, singletons0,
+    return FMT_PRINTABLE_IDENTIFIER(lower, singletons0,
                         sizeof(singletons0) / sizeof(*singletons0),
                         singletons0_lower, normal0, sizeof(normal0));
   }
   if (cp < 0x20000) {
-    return is_printable(lower, singletons1,
+    return FMT_PRINTABLE_IDENTIFIER(lower, singletons1,
                         sizeof(singletons1) / sizeof(*singletons1),
                         singletons1_lower, normal1, sizeof(normal1));
   }\
