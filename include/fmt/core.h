@@ -146,6 +146,17 @@
 #  define FMT_CONSTEXPR20
 #endif
 
+// Detect if consteval
+#ifdef FMT_USE_IF_CONSTEVAL
+// Use the provided definition.
+#elif !defined(__cpp_if_consteval)
+#  define FMT_USE_IF_CONSTEVAL 0
+#elif __cpp_if_consteval >= 202106L
+#  define FMT_USE_IF_CONSTEVAL 1
+#else
+#  define FMT_USE_IF_CONSTEVAL 0
+#endif
+
 // Check if exceptions are disabled.
 #ifdef FMT_USE_EXCEPTIONS
 // Use the provided definition.
@@ -901,6 +912,14 @@ template <typename Char = char> class parse_context {
 
 #ifndef FMT_USE_LOCALE
 #  define FMT_USE_LOCALE (FMT_OPTIMIZE_SIZE <= 1)
+#endif
+
+#ifndef FMT_USE_CONSTEVAL_IS_PRINTABLE
+#  if FMT_USE_CONSTEVAL && FMT_USE_IF_CONSTEVAL
+#    define FMT_USE_CONSTEVAL_IS_PRINTABLE 1
+#  else
+#    define FMT_USE_CONSTEVAL_IS_PRINTABLE 0
+#  endif
 #endif
 
 // A type-erased reference to std::locale to avoid the heavy <locale> include.

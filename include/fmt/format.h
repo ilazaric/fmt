@@ -1948,17 +1948,22 @@ auto write_ptr(OutputIt out, UIntPtr value, const format_specs* specs)
 // Returns true iff the code point cp is printable.
 FMT_API auto is_printable(uint32_t cp) -> bool;
 
-#define FMT_PRINTABLE_SPECIFIER_1 consteval
-#define FMT_PRINTABLE_SPECIFIER_2 consteval
-#define FMT_PRINTABLE_IDENTIFIER consteval_is_printable
-#include "is_printable.inc"
+#if FMT_USE_CONSTEVAL_IS_PRINTABLE
+#  define FMT_PRINTABLE_SPECIFIER_1 consteval
+#  define FMT_PRINTABLE_SPECIFIER_2 consteval
+#  define FMT_PRINTABLE_IDENTIFIER consteval_is_printable
+#  include "is_printable.inc"
+#endif
 
 inline FMT_CONSTEXPR auto needs_escape(uint32_t cp) -> bool {
   if (cp < 0x20 || cp == 0x7f || cp == '"' || cp == '\\') return true;
   if FMT_CONSTEXPR20 (FMT_OPTIMIZE_SIZE > 1) return false;
+#if FMT_USE_CONSTEVAL_IS_PRINTABLE
   if consteval {
     return !consteval_is_printable(cp);
-  } else {
+  } else
+#endif
+  {
     return !is_printable(cp);
   }
 }

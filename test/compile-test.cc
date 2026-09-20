@@ -495,5 +495,9 @@ TEST(compile_test, format_as) {
   EXPECT_EQ("[42]", fmt::format(FMT_COMPILE("[{}]"), type_with_format_as{42}));
 }
 
+#if FMT_CONSTEXPR_STRING
 static_assert(fmt::format(FMT_COMPILE("[{}]"), "a b c") == "[a b c]");
+#  if FMT_USE_CONSTEVAL_IS_PRINTABLE
 static_assert(fmt::format(FMT_COMPILE("[{:?}]"), "a b c") == "[\"a b c\"]");
+#  endif
+#endif
