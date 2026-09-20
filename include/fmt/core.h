@@ -2306,7 +2306,7 @@ template <typename Context> class value {
 
   // Formats an argument of a custom type, such as a user-defined class.
   template <typename T>
-  static void format_custom(void* arg, parse_context<char_type>& parse_ctx,
+  static FMT_CONSTEXPR void format_custom(void* arg, parse_context<char_type>& parse_ctx,
                             Context& ctx) {
     auto f = formatter<T, char_type>();
     parse_ctx.advance_to(f.parse(parse_ctx));
