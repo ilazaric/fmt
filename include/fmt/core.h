@@ -1818,11 +1818,11 @@ template <typename T> class buffer {
   buffer(const buffer&) = delete;
   void operator=(const buffer&) = delete;
 
-  auto begin() noexcept -> T* { return ptr_; }
-  auto end() noexcept -> T* { return ptr_ + size_; }
+  FMT_CONSTEXPR auto begin() noexcept -> T* { return ptr_; }
+  FMT_CONSTEXPR auto end() noexcept -> T* { return ptr_ + size_; }
 
-  auto begin() const noexcept -> const T* { return ptr_; }
-  auto end() const noexcept -> const T* { return ptr_ + size_; }
+  FMT_CONSTEXPR auto begin() const noexcept -> const T* { return ptr_; }
+  FMT_CONSTEXPR auto end() const noexcept -> const T* { return ptr_ + size_; }
 
   /// Returns the size of this buffer.
   constexpr auto size() const noexcept -> size_t { return size_; }
@@ -1969,7 +1969,7 @@ class iterator_buffer : public Traits, public buffer<T> {
     if (buf.size() == buffer_size) static_cast<iterator_buffer&>(buf).flush();
   }
 
-  void flush() {
+  FMT_CONSTEXPR void flush() {
     auto size = this->size();
     this->clear();
     const T* begin = data_;
@@ -1978,9 +1978,9 @@ class iterator_buffer : public Traits, public buffer<T> {
   }
 
  public:
-  explicit iterator_buffer(OutputIt out, size_t n = buffer_size)
+  FMT_CONSTEXPR explicit iterator_buffer(OutputIt out, size_t n = buffer_size)
       : Traits(n), buffer<T>(grow, data_, 0, buffer_size), out_(out) {}
-  iterator_buffer(iterator_buffer&& other) noexcept
+  FMT_CONSTEXPR iterator_buffer(iterator_buffer&& other) noexcept
       : Traits(other),
         buffer<T>(grow, data_, 0, buffer_size),
         out_(other.out_) {}
@@ -1990,11 +1990,13 @@ class iterator_buffer : public Traits, public buffer<T> {
     FMT_CATCH(...) {}
   }
 
-  auto out() -> OutputIt {
+  FMT_CONSTEXPR auto out() -> OutputIt {
     flush();
     return out_;
   }
-  auto count() const -> size_t { return Traits::count() + this->size(); }
+  FMT_CONSTEXPR auto count() const -> size_t {
+    return Traits::count() + this->size();
+  }
 };
 
 template <typename T>
@@ -2010,7 +2012,7 @@ class iterator_buffer<T*, T, fixed_buffer_traits> : public fixed_buffer_traits,
       static_cast<iterator_buffer&>(buf).flush();
   }
 
-  void flush() {
+  FMT_CONSTEXPR void flush() {
     size_t n = this->limit(this->size());
     if (this->data() == out_) {
       out_ += n;
@@ -2020,9 +2022,9 @@ class iterator_buffer<T*, T, fixed_buffer_traits> : public fixed_buffer_traits,
   }
 
  public:
-  explicit iterator_buffer(T* out, size_t n = buffer_size)
+  FMT_CONSTEXPR explicit iterator_buffer(T* out, size_t n = buffer_size)
       : fixed_buffer_traits(n), buffer<T>(grow, out, 0, n), out_(out) {}
-  iterator_buffer(iterator_buffer&& other) noexcept
+  FMT_CONSTEXPR iterator_buffer(iterator_buffer&& other) noexcept
       : fixed_buffer_traits(other),
         buffer<T>(static_cast<iterator_buffer&&>(other)),
         out_(other.out_) {
@@ -2033,21 +2035,21 @@ class iterator_buffer<T*, T, fixed_buffer_traits> : public fixed_buffer_traits,
   }
   ~iterator_buffer() { flush(); }
 
-  auto out() -> T* {
+  FMT_CONSTEXPR auto out() -> T* {
     flush();
     return out_;
   }
-  auto count() const -> size_t {
+  FMT_CONSTEXPR auto count() const -> size_t {
     return fixed_buffer_traits::count() + this->size();
   }
 };
 
 template <typename T> class iterator_buffer<T*, T> : public buffer<T> {
  public:
-  explicit iterator_buffer(T* out, size_t = 0)
+  FMT_CONSTEXPR explicit iterator_buffer(T* out, size_t = 0)
       : buffer<T>([](buffer<T>&, size_t) {}, out, 0, ~size_t()) {}
 
-  auto out() -> T* { return &*this->end(); }
+  FMT_CONSTEXPR auto out() -> T* { return &*this->end(); }
 };
 
 template <typename Container>
@@ -2064,7 +2066,7 @@ class container_buffer : public buffer<typename Container::value_type> {
  public:
   Container& container;
 
-  explicit container_buffer(Container& c)
+  FMT_CONSTEXPR explicit container_buffer(Container& c)
       : buffer<value_type>(grow, c.size()), container(c) {}
 };
 
@@ -2080,11 +2082,12 @@ class iterator_buffer<
   using base = container_buffer<typename OutputIt::container_type>;
 
  public:
-  explicit iterator_buffer(typename OutputIt::container_type& c) : base(c) {}
-  explicit iterator_buffer(OutputIt out, size_t = 0)
+  FMT_CONSTEXPR explicit iterator_buffer(typename OutputIt::container_type& c)
+      : base(c) {}
+  FMT_CONSTEXPR explicit iterator_buffer(OutputIt out, size_t = 0)
       : base(get_container(out)) {}
 
-  auto out() -> OutputIt { return OutputIt(this->container); }
+  FMT_CONSTEXPR auto out() -> OutputIt { return OutputIt(this->container); }
 };
 
 // A buffer that counts the number of code units written discarding the output.
@@ -2124,21 +2127,21 @@ struct is_buffer_appender<
 // Maps an output iterator to a buffer.
 template <typename T, typename OutputIt,
           FMT_ENABLE_IF(!is_buffer_appender<OutputIt>::value)>
-auto get_buffer(OutputIt out) -> iterator_buffer<OutputIt, T> {
+FMT_CONSTEXPR auto get_buffer(OutputIt out) -> iterator_buffer<OutputIt, T> {
   return iterator_buffer<OutputIt, T>(out);
 }
 template <typename T, typename OutputIt,
           FMT_ENABLE_IF(is_buffer_appender<OutputIt>::value)>
-auto get_buffer(OutputIt out) -> buffer<T>& {
+FMT_CONSTEXPR auto get_buffer(OutputIt out) -> buffer<T>& {
   return get_container(out);
 }
 
 template <typename Buf, typename OutputIt>
-auto get_iterator(Buf& buf, OutputIt) -> decltype(buf.out()) {
+FMT_CONSTEXPR auto get_iterator(Buf& buf, OutputIt) -> decltype(buf.out()) {
   return buf.out();
 }
 template <typename T, typename OutputIt>
-auto get_iterator(buffer<T>&, OutputIt out) -> OutputIt {
+FMT_CONSTEXPR auto get_iterator(buffer<T>&, OutputIt out) -> OutputIt {
   return out;
 }
 

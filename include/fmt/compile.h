@@ -488,7 +488,10 @@ template <typename OutputIt, typename CompiledFormat, typename... T,
           FMT_ENABLE_IF(detail::is_compiled_format<CompiledFormat>::value)>
 constexpr FMT_INLINE auto format_to(OutputIt out, const CompiledFormat& cf,
                                     const T&... args) -> OutputIt {
-  return cf.format(out, args...);
+  using Char = typename CompiledFormat::char_type;
+  auto&& buf = detail::get_buffer<Char>(out);
+  cf.format(basic_appender<Char>(buf), args...);
+  return detail::get_iterator(buf, out);
 }
 
 template <typename S, typename... T,

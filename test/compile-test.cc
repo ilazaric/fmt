@@ -500,6 +500,14 @@ static_assert(fmt::format(FMT_COMPILE("[{}]"), "a b c") == "[a b c]");
 static_assert(fmt::format(FMT_COMPILE("[{}]"), std::vector{1, 2, 3}) ==
               "[[1, 2, 3]]");
 
+constexpr bool test_format_to() {
+  std::string s;
+  fmt::format_to(std::back_inserter(s), FMT_COMPILE("{}"),
+                 std::vector{1, 2, 3});
+  return s == "[1, 2, 3]";
+}
+static_assert(test_format_to());
+
 #  if FMT_USE_CONSTEVAL_IS_PRINTABLE
 static_assert(fmt::format(FMT_COMPILE("[{:?}]"), "a b c") == "[\"a b c\"]");
 static_assert(fmt::format(FMT_COMPILE("{::?}"), std::vector{"foo", "bar"}) ==
