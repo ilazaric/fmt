@@ -240,7 +240,9 @@
 FMT_PRAGMA_GCC(push_options)
 #if FMT_USE_OPTIMIZE_PRAGMA && !defined(__OPTIMIZE__) && \
     !defined(__CUDACC__) && !defined(FMT_MODULE)
+#ifndef __EDG__
 FMT_PRAGMA_GCC(optimize("Og"))
+#endif
 #endif
 
 FMT_PRAGMA_MSVC(warning(push))
