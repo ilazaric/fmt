@@ -469,8 +469,7 @@ struct range_formatter<
       if (!std::is_same<T, Char>::value)
         report_error("invalid format specifier");
       if (!is_debug) {
-        set_brackets(detail::string_literal<Char, '"'>{},
-                     detail::string_literal<Char, '"'>{});
+        set_brackets({}, {});
         set_separator({});
         detail::maybe_set_debug_format(underlying_, false);
       }
